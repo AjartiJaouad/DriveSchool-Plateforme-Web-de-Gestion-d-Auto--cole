@@ -7,9 +7,37 @@ Route::get('/', function () {
     return view('welcome');
 });
 
+// Redirection après connexion selon le rôle
 Route::get('/dashboard', function () {
-    return view('dashboard');
+    return match (auth()->user()->role) {
+        'admin'    => redirect('/admin/dashboard'),
+        'moniteur' => redirect('/moniteur/dashboard'),
+        default    => view('dashboard'),
+    };
 })->middleware(['auth', 'verified'])->name('dashboard');
+
+// Routes ADMIN
+Route::middleware(['auth', 'role:admin'])
+    ->prefix('admin')
+    ->group(function () {
+
+        Route::get('/dashboard', function () {
+            return view('admin.dashboard');
+        })->name('admin.dashboard');
+
+    });
+
+
+Route::middleware(['auth', 'role:moniteur'])
+    ->prefix('moniteur')
+    ->group(function () {
+
+        Route::get('/dashboard', function () {
+            return view('moniteur.dashboard');
+        })->name('moniteur.dashboard');
+
+
+    });
 
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
