@@ -33,9 +33,9 @@ Route::middleware(['auth', 'role:moniteur'])
     ->prefix('moniteur')
     ->group(function () {
 
-        Route::get('/dashboard', function () {
-            return view('moniteur.dashboard');
-        })->name('moniteur.dashboard');
+        Route::get('/dashboard', [App\Http\Controllers\MoniteurDashboardController::class, 'index'])->name('moniteur.dashboard');
+        Route::get('/events', [App\Http\Controllers\MoniteurDashboardController::class, 'events'])->name('moniteur.events');
+
 
 
     });
