@@ -37,4 +37,32 @@ class MoniteurDashboardController extends Controller
 
         return response()->json($events);
     }
+
+    public function updateStatut(Request $request, Seance $seance)
+    {
+        $request->validate([
+            'statut' => 'required|in:valide,annule,en_attente'
+        ]);
+
+        $seance->update(['statut' => $request->statut]);
+
+        if ($request->statut === 'valide' && $seance->progression) {
+            $seance->progression->increment('total_heures_realisees');
+            if ($seance->progression->total_heures_prevues > 0) {
+                $seance->progression->pourcentage_progres = min(100, round(($seance->progression->total_heures_realisees / $seance->progression->total_heures_prevues) * 100));
+                $seance->progression->save();
+            }
+        } elseif ($request->statut === 'annule' && clone $seance->wasChanged('statut')) {
+             // Handle cancellation if it was previously valide, we might want to decrement
+             if ($seance->getOriginal('statut') === 'valide' && $seance->progression) {
+                 $seance->progression->decrement('total_heures_realisees');
+                 if ($seance->progression->total_heures_prevues > 0) {
+                    $seance->progression->pourcentage_progres = min(100, max(0, round(($seance->progression->total_heures_realisees / $seance->progression->total_heures_prevues) * 100)));
+                    $seance->progression->save();
+                 }
+             }
+        }
+
+        return redirect()->back()->with('success', 'Statut de la séance mis à jour.');
+    }
 }
