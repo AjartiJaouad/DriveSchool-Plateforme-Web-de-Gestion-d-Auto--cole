@@ -65,4 +65,24 @@ class MoniteurDashboardController extends Controller
 
         return redirect()->back()->with('success', 'Statut de la séance mis à jour.');
     }
+
+    public function storeEvaluation(Request $request, Seance $seance)
+    {
+        $request->validate([
+            'note_performance' => 'required|integer|min:1|max:5',
+            'remarques' => 'nullable|string',
+            'competences' => 'nullable|array'
+        ]);
+
+        $seance->evaluation()->updateOrCreate(
+            ['seance_id' => $seance->id],
+            [
+                'note_performance' => $request->note_performance,
+                'remarques' => $request->remarques,
+                'competences' => $request->competences ?? []
+            ]
+        );
+
+        return redirect()->back()->with('success', 'Évaluation enregistrée avec succès.');
+    }
 }

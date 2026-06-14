@@ -36,6 +36,8 @@ Route::middleware(['auth', 'role:moniteur'])
         Route::get('/dashboard', [App\Http\Controllers\MoniteurDashboardController::class, 'index'])->name('moniteur.dashboard');
         Route::get('/events', [App\Http\Controllers\MoniteurDashboardController::class, 'events'])->name('moniteur.events');
         Route::patch('/seances/{seance}/statut', [App\Http\Controllers\MoniteurDashboardController::class, 'updateStatut'])->name('moniteur.seances.statut');
+        Route::post('/seances/{seance}/evaluation', [App\Http\Controllers\MoniteurDashboardController::class, 'storeEvaluation'])->name('moniteur.seances.evaluation');
+
 
 
 
