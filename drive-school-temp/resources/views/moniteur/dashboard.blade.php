@@ -41,7 +41,23 @@
                         </form>
                     </div>
                 </div>
-                <div class="items-center px-4 py-3">
+                <div class="mt-4 pt-4 border-t border-gray-200 text-left">
+                    <h4 class="font-medium text-gray-900 mb-2">Évaluation pédagogique</h4>
+                    <form id="evaluationForm" method="POST" action="">
+                        @csrf
+                        <div class="mb-3">
+                            <label class="block text-sm font-medium text-gray-700">Note (/5)</label>
+                            <input type="number" name="note_performance" min="1" max="5" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="block text-sm font-medium text-gray-700">Remarques</label>
+                            <textarea name="remarques" rows="2" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"></textarea>
+                        </div>
+                        <button type="submit" class="w-full bg-blue-500 text-white px-4 py-2 rounded shadow hover:bg-blue-600">Enregistrer l'évaluation</button>
+                    </form>
+                </div>
+                
+                <div class="items-center px-4 py-3 mt-4 text-center">
                     <button id="closeModal" class="px-4 py-2 bg-gray-200 text-gray-800 rounded shadow hover:bg-gray-300">Fermer</button>
                 </div>
             </div>
@@ -78,8 +94,10 @@
                 document.getElementById('modalStatut').innerText = "Statut actuel: " + eventObj.extendedProps.statut;
                 
                 var updateUrl = "{{ url('moniteur/seances') }}/" + seanceId + "/statut";
+                var evalUrl = "{{ url('moniteur/seances') }}/" + seanceId + "/evaluation";
                 document.getElementById('validateForm').action = updateUrl;
                 document.getElementById('cancelForm').action = updateUrl;
+                document.getElementById('evaluationForm').action = evalUrl;
                 
                 modal.classList.remove('hidden');
             }
