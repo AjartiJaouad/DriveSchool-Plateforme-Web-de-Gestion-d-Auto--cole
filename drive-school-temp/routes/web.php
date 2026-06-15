@@ -3,6 +3,7 @@
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Admin\PlageHoraireController;
+use App\Http\Controllers\Candidat\ReservationController;
 Route::get('/', function () {
     return view('welcome');
 });
@@ -39,6 +40,10 @@ Route::middleware(['auth', 'role:moniteur'])
 
 
     });
+    Route::middleware(['auth', 'role:candidat'])->prefix('candidat')->name('candidat.')->group(function () {
+
+    Route::get('/reservations', [ReservationController::class, 'index'])->name('reservations.index');
+});
 
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
