@@ -31,7 +31,8 @@
 
             <!-- Page Content -->
             <main>
-                {{ $slot }}
+                {{-- Beddelna {{ $slot }} b @yield bch l-espace candidat iqbel @extends --}}
+                @yield('content')
             </main>
         </div>
     </body>

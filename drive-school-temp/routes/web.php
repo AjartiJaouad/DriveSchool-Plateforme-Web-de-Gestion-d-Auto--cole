@@ -49,7 +49,10 @@ Route::middleware(['auth', 'role:candidat'])
     ->name('candidat.')
     ->group(function () {
         Route::get('/', [ReservationController::class, 'index'])->name('index');
+        Route::get('/index', [ReservationController::class, 'index'])->name('index.alias');
         Route::get('/reservations', [ReservationController::class, 'index'])->name('reservations.index');
+        Route::get('/reservations/events', [ReservationController::class, 'events'])->name('seances.json');
+        Route::patch('/seances/{seance}/statut', [ReservationController::class, 'updateStatut'])->name('seance.updateStatut');
 
         Route::get('/progression', function () {
             $user = Auth::user();

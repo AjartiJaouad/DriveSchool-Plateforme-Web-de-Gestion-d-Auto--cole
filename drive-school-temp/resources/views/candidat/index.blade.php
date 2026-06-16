@@ -1,55 +1,61 @@
-<x-app-layout>
-    <x-slot name="header">
-        <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-            Choisir un créneau de conduite 🚗
-        </h2>
-    </x-slot>
+@extends('layouts.app')
 
-    <div class="py-12">
-        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-            <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg p-6">
+@section('content')
+<div class="container mx-auto p-6">
+    <h1 class="text-2xl font-bold mb-6">Mon Espace Candidat</h1>
 
-                <!-- 📅 مكان ظهور الأجندة الجرافيك -->
-                <div id='calendar' class="bg-gray-50 p-4 rounded-lg shadow-inner"></div>
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <!-- Section Mes Séances -->
+        <div class="bg-white p-4 rounded shadow">
+            <h2 class="font-semibold text-lg border-b pb-2 mb-4">Mes Séances</h2>
 
-            </div>
+            <h3 class="text-sm font-bold text-green-600">À venir :</h3>
+            @if(isset($seancesAvenir) && $seancesAvenir->count())
+                <ul class="mb-4">
+                    @foreach($seancesAvenir as $seance)
+                        <li class="mb-2 text-sm flex justify-between items-center">
+                            <span>
+                                Le {{ \Carbon\Carbon::parse($seance->plageHoraire->date . ' ' . $seance->plageHoraire->heure_debut)->format('d/m/Y à H:i') }}
+                            </span>
+                            <form action="{{ route('candidat.seance.updateStatut', $seance) }}" method="POST">
+                                @csrf
+                                @method('PATCH')
+                                <input type="hidden" name="action" value="annuler">
+                                <button type="submit" class="text-red-500 hover:underline text-xs">Annuler</button>
+                            </form>
+                        </li>
+                    @endforeach
+                </ul>
+            @else
+                <p class="text-sm text-gray-500">Aucune séance à venir pour le moment.</p>
+            @endif
+        </div>
+
+        <!-- Section Calendrier -->
+        <div class="lg:col-span-2 bg-white p-4 rounded shadow">
+            <div id='calendar'></div>
         </div>
     </div>
+</div>
 
-    <!-- 🌟 إدخال مكتبة FullCalendar عن طريق الـ CDN -->
-    <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.11/index.global.min.js"></script>
+<!-- Scripts FullCalendar -->
+<script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.js'></script>
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    var calendarEl = document.getElementById('calendar');
+    var calendar = new FullCalendar.Calendar(calendarEl, {
+      initialView: 'timeGridWeek',
+      slotMinTime: '08:00:00',
+      slotMaxTime: '20:00:00',
+      events: "{{ route('candidat.seances.json') }}",
 
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            var calendarEl = document.getElementById('calendar');
-
-            var calendar = new FullCalendar.Calendar(calendarEl, {
-                initialView: 'timeGridWeek', // كيعرض السيمانة مقسمة بالسوايع (أحسن خيار للأوتو إيكول)
-                slotMinTime: '08:00:00',     // بداية وقت العمل
-                slotMaxTime: '20:00:00',     // نهاية وقت العمل
-                locale: 'fr',                // اللغة الفرنسية
-                headerToolbar: {
-                    left: 'prev,next today',
-                    center: 'title',
-                    right: 'timeGridWeek,timeGridDay'
-                },
-                allDaySlot: false,          // حيد الخانة ديال "اليوم كاملا" حيت حصص السياقة بالوقت
-                events: [
-                    // هنا غادي نحطو السوايع الخاويين من بعد ف التيكيت 12، دابا حطينا مثال تجريبي
-                    {
-                        title: 'Créneau Disponible (Exemple)',
-                        start: '2026-06-15T10:00:00',
-                        end: '2026-06-15T12:00:00',
-                        backgroundColor: '#3b82f6',
-                        borderColor: '#3b82f6',
-                    }
-                ],
-                eventClick: function(info) {
-                    alert('Vous avez cliqué sur : ' + info.event.title);
-                }
-            });
-
-            calendar.render();
-        });
-    </script>
-</x-app-layout>
+      dateClick: function(info) {
+         if(confirm("Voulez-vous réserver une séance le " + info.dateStr + " ?")) {
+             // Logique pour la réservation
+         }
+      }
+    });
+    calendar.render();
+  });
+</script>
+@endsection
