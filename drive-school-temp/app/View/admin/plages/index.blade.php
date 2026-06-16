@@ -14,7 +14,6 @@
 
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
 
-                <!-- ➕ فورم إضافة كرينو جديد -->
                 <div class="bg-white p-6 rounded-lg shadow-sm border border-gray-100 h-fit">
                     <h3 class="font-bold text-lg text-gray-700 mb-4 border-b pb-2">Ajouter un créneau</h3>
                     <form action="{{ route('admin.plages.store') }}" method="POST">
@@ -104,4 +103,15 @@
             </div>
         </div>
     </div>
-</x-app-layout>
+
+    <?php
+    use App\Http\Controllers\Candidat\ReservationController;
+
+    Route::middleware(['auth','role:candidat'])
+        ->prefix('candidat')
+        ->group(function () {
+            Route::get('/reservations', [ReservationController::class, 'index'])->name('candidat.reservations.index');
+            Route::get('/reservations/events', [ReservationController::class, 'events'])->name('candidat.reservations.events');
+            Route::post('/reservations/book', [ReservationController::class, 'book'])->name('candidat.reservations.book');
+        });
+    </x-app-layout>

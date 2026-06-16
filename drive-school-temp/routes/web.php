@@ -19,11 +19,12 @@ Route::get('/dashboard', function () {
 // Routes ADMIN
 Route::middleware(['auth', 'role:admin'])
     ->prefix('admin')
+    ->as('admin.')
     ->group(function () {
-Route::resource('plages', PlageHoraireController::class)->only(['index', 'store', 'destroy']);
+        Route::resource('plages', PlageHoraireController::class)->only(['index', 'store', 'destroy']);
         Route::get('/dashboard', [App\Http\Controllers\Admin\DashboardController::class, 'index'])->name('dashboard');
         Route::resource('moniteurs', App\Http\Controllers\Admin\MoniteurController::class)->except(['destroy']);
-Route::patch('moniteurs/{moniteur}/toggle', [App\Http\Controllers\Admin\MoniteurController::class, 'toggleStatus'])->name('moniteurs.toggle');
+        Route::patch('moniteurs/{moniteur}/toggle', [App\Http\Controllers\Admin\MoniteurController::class, 'toggleStatus'])->name('moniteurs.toggle');
     });
 
 

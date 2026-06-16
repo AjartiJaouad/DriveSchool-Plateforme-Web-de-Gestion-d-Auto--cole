@@ -24,14 +24,17 @@ class MoniteurController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'name' => 'required|string|max:255',
+            'nom' => 'required|string|max:255',
+            'prenom' => 'required|string|max:255',
+            'matricule' => 'required|string|max:255|unique:moniteurs,matricule',
+            'telephone' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:users',
             'password' => 'required|string|min:8|confirmed',
             'type_permis' => 'required|string',
         ]);
 
         $user = User::create([
-            'name' => $request->name,
+            'name' => trim($request->nom . ' ' . $request->prenom),
             'email' => $request->email,
             'password' => Hash::make($request->password),
             'role' => 'moniteur',
@@ -39,6 +42,8 @@ class MoniteurController extends Controller
 
         Moniteur::create([
             'user_id' => $user->id,
+            'matricule' => $request->matricule,
+            'telephone' => $request->telephone,
             'type_permis' => $request->type_permis,
             'actif' => true,
         ]);
