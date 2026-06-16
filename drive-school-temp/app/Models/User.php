@@ -16,7 +16,9 @@ class User extends Authenticatable
 {
     /** @use HasFactory<UserFactory> */
     use HasFactory, Notifiable;
-
+        public function moniteur(){
+                    return $this->hasOne(Moniteur::class, 'user_id');
+                                                }
     /**
      * Get the attributes that should be cast.
      *
