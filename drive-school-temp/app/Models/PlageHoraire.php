@@ -16,6 +16,7 @@ class PlageHoraire extends Model
         'date',
         'heure_debut',
         'heure_fin',
+        'est_dispo',
     ];
 
     public function moniteur()

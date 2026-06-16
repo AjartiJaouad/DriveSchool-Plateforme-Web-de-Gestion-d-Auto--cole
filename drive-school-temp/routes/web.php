@@ -52,6 +52,7 @@ Route::middleware(['auth', 'role:candidat'])
         Route::get('/index', [ReservationController::class, 'index'])->name('index.alias');
         Route::get('/reservations', [ReservationController::class, 'index'])->name('reservations.index');
         Route::get('/reservations/events', [ReservationController::class, 'events'])->name('seances.json');
+        Route::post('/reservations/book', [ReservationController::class, 'reserver'])->name('reservations.book');
         Route::patch('/seances/{seance}/statut', [ReservationController::class, 'updateStatut'])->name('seance.updateStatut');
 
         Route::get('/progression', function () {

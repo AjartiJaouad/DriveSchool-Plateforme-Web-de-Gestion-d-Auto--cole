@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Candidat;
 
 use App\Http\Controllers\Controller;
 use App\Models\Candidat;
+use App\Models\PlageHoraire;
 use App\Models\Seance;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -40,6 +41,26 @@ class ReservationController extends Controller
             return response()->json([]);
         }
 
+        $events = [];
+
+        $plagesDisponibles = PlageHoraire::where('est_dispo', true)
+            ->whereDate('date', '>=', now()->toDateString())
+            ->with('moniteur.user')
+            ->get();
+
+        foreach ($plagesDisponibles as $plage) {
+            $events[] = [
+                'id' => 'plage_' . $plage->id,
+                'title' => 'Disponible - ' . ($plage->moniteur?->user?->name ?? 'Moniteur'),
+                'start' => $plage->date . 'T' . $plage->heure_debut,
+                'end' => $plage->date . 'T' . $plage->heure_fin,
+                'backgroundColor' => '#3B82F6',
+                'extendedProps' => [
+                    'statut' => 'disponible',
+                ],
+            ];
+        }
+
         $seancesAvenir = Seance::whereHas('progression', function ($query) use ($candidat) {
                 $query->where('candidat_id', $candidat->id);
             })
@@ -49,8 +70,8 @@ class ReservationController extends Controller
             ->with('plageHoraire')
             ->get();
 
-        $events = $seancesAvenir->map(function ($seance) {
-            return [
+        foreach ($seancesAvenir as $seance) {
+            $events[] = [
                 'id' => $seance->id,
                 'title' => 'Séance - ' . ucfirst($seance->statut ?? 'en attente'),
                 'start' => $seance->plageHoraire->date . 'T' . $seance->plageHoraire->heure_debut,
@@ -60,9 +81,44 @@ class ReservationController extends Controller
                     'statut' => $seance->statut,
                 ],
             ];
-        });
+        }
 
         return response()->json($events);
+    }
+
+    public function reserver(Request $request)
+    {
+        $request->validate([
+            'plage_horaire_id' => 'required|exists:plages_horaires,id',
+        ]);
+
+        $candidat = auth()->user()->candidat;
+
+        if (! $candidat) {
+            return response()->json(['error' => 'Utilisateur non autorisé.'], 403);
+        }
+
+        $progression = $candidat->progressionDossier;
+
+        if (! $progression) {
+            return response()->json(['error' => 'Aucun dossier de progression trouvé.'], 400);
+        }
+
+        $plage = PlageHoraire::findOrFail($request->plage_horaire_id);
+
+        if (! $plage->est_dispo) {
+            return response()->json(['error' => 'Ce créneau est déjà réservé.'], 400);
+        }
+
+        Seance::create([
+            'progression_id' => $progression->id,
+            'plage_horaire_id' => $plage->id,
+            'statut' => 'en_attente',
+        ]);
+
+        $plage->update(['est_dispo' => false]);
+
+        return response()->json(['success' => 'Séance réservée avec succès !']);
     }
 
     public function updateStatut(Request $request, Seance $seance)

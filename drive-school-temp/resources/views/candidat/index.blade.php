@@ -49,10 +49,32 @@
       slotMaxTime: '20:00:00',
       events: "{{ route('candidat.seances.json') }}",
 
-      dateClick: function(info) {
-         if(confirm("Voulez-vous réserver une séance le " + info.dateStr + " ?")) {
-             // Logique pour la réservation
-         }
+      eventClick: function(info) {
+          if (info.event.extendedProps.statut === 'disponible') {
+              if (confirm('Voulez-vous réserver ce créneau : ' + info.event.title + ' ?')) {
+                  fetch('{{ route("candidat.reservations.book") }}', {
+                      method: 'POST',
+                      headers: {
+                          'Content-Type': 'application/json',
+                          'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                      },
+                      body: JSON.stringify({
+                          plage_horaire_id: info.event.id.replace('plage_', '')
+                      })
+                  })
+                  .then(response => response.json())
+                  .then(data => {
+                      if (data.success) {
+                          alert(data.success);
+                          location.reload();
+                      } else {
+                          alert(data.error || 'Impossible de réserver ce créneau.');
+                      }
+                  });
+              }
+          } else {
+              alert('Ceci est votre séance : ' + info.event.title);
+          }
       }
     });
     calendar.render();
