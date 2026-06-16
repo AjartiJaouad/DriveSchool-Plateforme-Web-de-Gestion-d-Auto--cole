@@ -3,6 +3,7 @@
 use App\Http\Controllers\Admin\CandidatController;
 use App\Http\Controllers\Candidat\ReservationController;
 use App\Http\Controllers\ProfileController;
+use App\Models\Candidat;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\Admin\PlageHoraireController;
@@ -47,10 +48,19 @@ Route::middleware(['auth', 'role:candidat'])
     ->prefix('candidat')
     ->name('candidat.')
     ->group(function () {
+        Route::get('/', [ReservationController::class, 'index'])->name('index');
         Route::get('/reservations', [ReservationController::class, 'index'])->name('reservations.index');
 
         Route::get('/progression', function () {
-            return view('candidat.progression');
+            $user = Auth::user();
+
+            $candidat = Candidat::where('user_id', $user->id)
+                ->with(['progressionDossier.seances.plageHoraire'])
+                ->first();
+
+            $progression = $candidat?->progressionDossier;
+
+            return view('candidat.progression', compact('progression'));
         })->name('progression');
     });
 
