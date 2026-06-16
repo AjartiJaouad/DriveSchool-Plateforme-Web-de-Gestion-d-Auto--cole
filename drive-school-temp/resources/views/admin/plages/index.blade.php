@@ -30,15 +30,8 @@
                         </div>
 
                         <div class="mb-4">
-                            <label class="block text-gray-700 text-sm font-semibold mb-1">Jour de la semaine</label>
-                            <select name="jour_semaine" class="w-full rounded border-gray-300 focus:border-blue-500 focus:ring-blue-500" required>
-                                <option value="Lundi">Lundi</option>
-                                <option value="Mardi">Mardi</option>
-                                <option value="Mercredi">Mercredi</option>
-                                <option value="Jeudi">Jeudi</option>
-                                <option value="Vendredi">Vendredi</option>
-                                <option value="Samedi">Samedi</option>
-                            </select>
+                            <label class="block text-gray-700 text-sm font-semibold mb-1">Date</label>
+                            <input type="date" name="date" class="w-full rounded border-gray-300 focus:border-blue-500 focus:ring-blue-500" required>
                         </div>
 
                         <div class="grid grid-cols-2 gap-2 mb-6">
@@ -82,7 +75,7 @@
                                         <td class="p-3 font-medium">{{ $plage->moniteur->user->name }}</td>
                                         <td class="p-3"><span class="bg-gray-100 text-gray-800 px-2 py-1 rounded text-xs font-semibold">{{ $plage->moniteur->type_permis }}</span></td>
                                         <td class="p-3">
-                                            <span class="bg-blue-50 text-blue-700 px-2 py-1 rounded text-xs font-bold">{{ $plage->jour_semaine }}</span>
+                                            <span class="bg-blue-50 text-blue-700 px-2 py-1 rounded text-xs font-bold">{{ \Carbon\Carbon::parse($plage->date)->format('d/m/Y') }}</span>
                                         </td>
                                         <td class="p-3 font-mono text-gray-600">
                                             {{ \Carbon\Carbon::parse($plage->heure_debut)->format('H:i') }} - {{ \Carbon\Carbon::parse($plage->heure_fin)->format('H:i') }}

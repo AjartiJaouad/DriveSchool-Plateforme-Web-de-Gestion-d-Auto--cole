@@ -22,7 +22,7 @@ class PlageHoraireController extends Controller
     {
         $request->validate([
             'moniteur_id' => 'required|exists:moniteurs,id',
-            'jour_semaine' => 'required|string',
+            'date' => 'required|date',
             'heure_debut' => 'required|date_format:H:i',
             'heure_fin' => 'required|date_format:H:i|after:heure_debut',
         ], [
@@ -31,7 +31,7 @@ class PlageHoraireController extends Controller
 
         PlageHoraire::create([
             'moniteur_id' => $request->moniteur_id,
-            'jour_semaine' => $request->jour_semaine,
+            'date' => $request->date,
             'heure_debut' => $request->heure_debut,
             'heure_fin' => $request->heure_fin,
         ]);

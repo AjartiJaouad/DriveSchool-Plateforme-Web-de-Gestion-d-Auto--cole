@@ -9,9 +9,11 @@ class PlageHoraire extends Model
 {
     use HasFactory;
 
+    protected $table = 'plages_horaires';
+
     protected $fillable = [
         'moniteur_id',
-        'jour_semaine',
+        'date',
         'heure_debut',
         'heure_fin',
     ];
