@@ -2,15 +2,15 @@
 
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\Admin\PlageHoraireController;
-use App\Http\Controllers\Candidat\ReservationController;
 Route::get('/', function () {
     return view('welcome');
 });
 
 // Redirection après connexion selon le rôle
 Route::get('/dashboard', function () {
-    return match (auth()->user()->role) {
+    return match (Auth::user()->role) {
         'admin'    => redirect('/admin/dashboard'),
         'moniteur' => redirect('/moniteur/dashboard'),
         default    => view('dashboard'),
@@ -20,13 +20,13 @@ Route::get('/dashboard', function () {
 // Routes ADMIN
 Route::middleware(['auth', 'role:admin'])
     ->prefix('admin')
+    ->as('admin.')
     ->group(function () {
-Route::resource('plages', PlageHoraireController::class)->only(['index', 'store', 'destroy']);
-        Route::get('/dashboard', function () {
-            return view('admin.dashboard');
-        })->name('admin.dashboard');
+        Route::resource('plages', PlageHoraireController::class)->only(['index', 'store', 'destroy']);
         Route::resource('moniteurs', App\Http\Controllers\Admin\MoniteurController::class)->except(['destroy']);
-Route::patch('moniteurs/{moniteur}/toggle', [App\Http\Controllers\Admin\MoniteurController::class, 'toggleStatus'])->name('moniteurs.toggle');
+        Route::resource('candidats', CandidatController::class)->only(['index', 'show']);
+        Route::patch('moniteurs/{moniteur}/toggle', [App\Http\Controllers\Admin\MoniteurController::class, 'toggleStatus'])->name('moniteurs.toggle');
+        Route::get('/dashboard', [App\Http\Controllers\Admin\DashboardController::class, 'index'])->name('dashboard');
     });
 
 
@@ -34,9 +34,13 @@ Route::middleware(['auth', 'role:moniteur'])
     ->prefix('moniteur')
     ->group(function () {
 
-        Route::get('/dashboard', function () {
-            return view('moniteur.dashboard');
-        })->name('moniteur.dashboard');
+        Route::get('/dashboard', [App\Http\Controllers\MoniteurDashboardController::class, 'index'])->name('moniteur.dashboard');
+        Route::get('/events', [App\Http\Controllers\MoniteurDashboardController::class, 'events'])->name('moniteur.events');
+        Route::patch('/seances/{seance}/statut', [App\Http\Controllers\MoniteurDashboardController::class, 'updateStatut'])->name('moniteur.seances.statut');
+        Route::post('/seances/{seance}/evaluation', [App\Http\Controllers\MoniteurDashboardController::class, 'storeEvaluation'])->name('moniteur.seances.evaluation');
+
+
+
 
 
     });

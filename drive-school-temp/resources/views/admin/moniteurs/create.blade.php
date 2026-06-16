@@ -1,56 +1,49 @@
 <x-app-layout>
     <x-slot name="header">
-        <div class="flex justify-between items-center">
-            <h2 class="font-semibold text-xl text-gray-800 leading-tight">Gestion des Moniteurs</h2>
-            <a href="{{ route('admin.moniteurs.create') }}" class="bg-blue-600 text-white px-4 py-2 rounded shadow hover:bg-blue-700">Ajouter un Moniteur</a>
-        </div>
+        <h2 class="font-semibold text-xl text-gray-800 leading-tight">Ajouter un Moniteur</h2>
     </x-slot>
 
     <div class="py-12">
-        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-            @if(session('success'))
-                <div class="mb-4 bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded">
-                    {{ session('success') }}
-                </div>
-            @endif
-
-            <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg p-6">
-                <table class="w-full text-left border-collapse">
-                    <thead>
-                        <tr class="border-b bg-gray-50">
-                            <th class="p-3">Nom</th>
-                            <th class="p-3">Email</th>
-                            <th class="p-3">Type Permis</th>
-                            <th class="p-3">Statut</th>
-                            <th class="p-3">Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @foreach($moniteurs as $moniteur)
-                        <tr class="border-b hover:bg-gray-50">
-                            <td class="p-3">{{ $moniteur->user->name }}</td>
-                            <td class="p-3">{{ $moniteur->user->email }}</td>
-                            <td class="p-3"><span class="bg-gray-200 px-2 py-1 rounded text-sm font-semibold">{{ $moniteur->type_permis }}</span></td>
-                            <td class="p-3">
-                                <span class="px-2 py-1 rounded text-xs font-bold {{ $moniteur->actif ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800' }}">
-                                    {{ $moniteur->actif ? 'Actif' : 'Inactif' }}
-                                </span>
-                            </td>
-                            <td class="p-3 flex space-x-2">
-                                <a href="{{ route('admin.moniteurs.edit', $moniteur) }}" class="text-yellow-600 hover:text-yellow-900">Modifier</a>
-
-                                <form action="{{ route('admin.moniteurs.toggle', $moniteur) }}" method="POST">
-                                    @csrf
-                                    @method('PATCH')
-                                    <button type="submit" class="{{ $moniteur->actif ? 'text-red-600 hover:text-red-900' : 'text-green-600 hover:text-green-900' }}">
-                                        {{ $moniteur->actif ? 'Désactiver' : 'Activer' }}
-                                    </button>
-                                </form>
-                            </td>
-                        </tr>
-                        @endforeach
-                    </tbody>
-                </table>
+        <div class="max-w-md mx-auto sm:px-6 lg:px-8">
+            <div class="bg-white p-6 rounded-lg shadow-sm border border-gray-100">
+                <form action="{{ route('admin.moniteurs.store') }}" method="POST">
+                    @csrf
+                    <div class="grid gap-4">
+                        <div class="mb-4">
+                            <label class="block text-gray-700 font-semibold text-sm mb-1">Nom</label>
+                            <input type="text" name="nom" value="{{ old('nom') }}" class="w-full rounded border-gray-300 focus:border-blue-500 focus:ring-blue-500" required>
+                        </div>
+                        <div class="mb-4">
+                            <label class="block text-gray-700 font-semibold text-sm mb-1">Prénom</label>
+                            <input type="text" name="prenom" value="{{ old('prenom') }}" class="w-full rounded border-gray-300 focus:border-blue-500 focus:ring-blue-500" required>
+                        </div>
+                        <div class="mb-4">
+                            <label class="block text-gray-700 font-semibold text-sm mb-1">Email</label>
+                            <input type="email" name="email" value="{{ old('email') }}" class="w-full rounded border-gray-300 focus:border-blue-500 focus:ring-blue-500" required>
+                        </div>
+                        <div class="mb-4">
+                            <label class="block text-gray-700 font-semibold text-sm mb-1">Matricule</label>
+                            <input type="text" name="matricule" value="{{ old('matricule') }}" class="w-full rounded border-gray-300 focus:border-blue-500 focus:ring-blue-500" required>
+                        </div>
+                        <div class="mb-4">
+                            <label class="block text-gray-700 font-semibold text-sm mb-1">Téléphone</label>
+                            <input type="text" name="telephone" value="{{ old('telephone') }}" class="w-full rounded border-gray-300 focus:border-blue-500 focus:ring-blue-500" required>
+                        </div>
+                        <div class="mb-4">
+                            <label class="block text-gray-700 font-semibold text-sm mb-1">Type de Permis (Ex: B, C, D)</label>
+                            <input type="text" name="type_permis" value="{{ old('type_permis') }}" class="w-full rounded border-gray-300 focus:border-blue-500 focus:ring-blue-500" required>
+                        </div>
+                        <div class="mb-4">
+                            <label class="block text-gray-700 font-semibold text-sm mb-1">Mot de passe</label>
+                            <input type="password" name="password" class="w-full rounded border-gray-300 focus:border-blue-500 focus:ring-blue-500" required>
+                        </div>
+                        <div class="mb-4">
+                            <label class="block text-gray-700 font-semibold text-sm mb-1">Confirmer le mot de passe</label>
+                            <input type="password" name="password_confirmation" class="w-full rounded border-gray-300 focus:border-blue-500 focus:ring-blue-500" required>
+                        </div>
+                    </div>
+                    <button type="submit" class="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700 font-semibold shadow transition">Enregistrer</button>
+                </form>
             </div>
         </div>
     </div>

@@ -58,7 +58,6 @@
                     </form>
                 </div>
 
-                <!-- 📋 جدول عرض التخطيط الحالي -->
                 <div class="bg-white p-6 rounded-lg shadow-sm border border-gray-100 md:col-span-2">
                     <h3 class="font-bold text-lg text-gray-700 mb-4 border-b pb-2">Planning des disponibilités</h3>
 
@@ -69,9 +68,11 @@
                             <table class="w-full text-left border-collapse">
                                 <thead>
                                     <tr class="border-b bg-gray-50 text-gray-600 text-sm font-semibold">
-                                        <th class="p-3">Moniteur</th>
+                                                <th class="p-3">Moniteur</th>
+                                        <th class="p-3">Permis</th>
                                         <th class="p-3">Jour</th>
                                         <th class="p-3">Créneau Horaire</th>
+                                        <th class="p-3">Statut Moniteur</th>
                                         <th class="p-3 text-center">Action</th>
                                     </tr>
                                 </thead>
@@ -79,11 +80,17 @@
                                     @foreach($plages as $plage)
                                     <tr class="border-b hover:bg-gray-50 transition">
                                         <td class="p-3 font-medium">{{ $plage->moniteur->user->name }}</td>
+                                        <td class="p-3"><span class="bg-gray-100 text-gray-800 px-2 py-1 rounded text-xs font-semibold">{{ $plage->moniteur->type_permis }}</span></td>
                                         <td class="p-3">
                                             <span class="bg-blue-50 text-blue-700 px-2 py-1 rounded text-xs font-bold">{{ $plage->jour_semaine }}</span>
                                         </td>
                                         <td class="p-3 font-mono text-gray-600">
                                             {{ \Carbon\Carbon::parse($plage->heure_debut)->format('H:i') }} - {{ \Carbon\Carbon::parse($plage->heure_fin)->format('H:i') }}
+                                        </td>
+                                        <td class="p-3">
+                                            <span class="px-2 py-1 rounded text-xs font-bold {{ $plage->moniteur->actif ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800' }}">
+                                                {{ $plage->moniteur->actif ? 'Actif' : 'Inactif' }}
+                                            </span>
                                         </td>
                                         <td class="p-3 text-center">
                                             <form action="{{ route('admin.plages.destroy', $plage) }}" method="POST" onsubmit="return confirm('Retirer ce créneau de la liste ?');">
@@ -103,15 +110,4 @@
             </div>
         </div>
     </div>
-
-    <?php
-    use App\Http\Controllers\Candidat\ReservationController;
-
-    Route::middleware(['auth','role:candidat'])
-        ->prefix('candidat')
-        ->group(function () {
-            Route::get('/reservations', [ReservationController::class, 'index'])->name('candidat.reservations.index');
-            Route::get('/reservations/events', [ReservationController::class, 'events'])->name('candidat.reservations.events');
-            Route::post('/reservations/book', [ReservationController::class, 'book'])->name('candidat.reservations.book');
-        });
-    </x-app-layout>
+</x-app-layout>
