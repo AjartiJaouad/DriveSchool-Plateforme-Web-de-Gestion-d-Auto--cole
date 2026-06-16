@@ -11,7 +11,7 @@ class PlageHoraireController extends Controller
 {
     public function index()
     {
-        $moniteurs = Moniteur::with('user')->where('actif', true)->get();
+        $moniteurs = Moniteur::actifs()->with('user')->get();
 
         $plages = PlageHoraire::with('moniteur.user')->get();
 

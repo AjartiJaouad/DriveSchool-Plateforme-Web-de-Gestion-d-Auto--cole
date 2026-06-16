@@ -61,7 +61,10 @@ class MoniteurController extends Controller
         $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:users,email,' . $moniteur->user_id,
+            'matricule' => 'required|string|max:255|unique:moniteurs,matricule,' . $moniteur->id,
+            'telephone' => 'required|string|max:255',
             'type_permis' => 'required|string',
+            'actif' => 'nullable|boolean',
         ]);
 
         $moniteur->user->update([
@@ -70,7 +73,10 @@ class MoniteurController extends Controller
         ]);
 
         $moniteur->update([
+            'matricule' => $request->matricule,
+            'telephone' => $request->telephone,
             'type_permis' => $request->type_permis,
+            'actif' => $request->boolean('actif', true),
         ]);
 
         return redirect()->route('admin.moniteurs.index')->with('success', 'Moniteur modifié avec succès !');

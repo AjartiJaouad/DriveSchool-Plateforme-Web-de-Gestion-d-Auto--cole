@@ -74,14 +74,11 @@ class MoniteurDashboardController extends Controller
             'competences' => 'nullable|array'
         ]);
 
-        $seance->evaluation()->updateOrCreate(
-            ['seance_id' => $seance->id],
-            [
-                'note_performance' => $request->note_performance,
-                'remarques' => $request->remarques,
-                'competences' => $request->competences ?? []
-            ]
-        );
+        $seance->update([
+            'note_performance' => $request->note_performance,
+            'remarques' => $request->remarques,
+            'competences' => $request->competences ?? [],
+        ]);
 
         return redirect()->back()->with('success', 'Évaluation enregistrée avec succès.');
     }

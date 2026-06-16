@@ -13,6 +13,13 @@ class Seance extends Model
         'progression_id',
         'plage_horaire_id',
         'statut',
+        'note_performance',
+        'competences',
+        'remarques',
+    ];
+
+    protected $casts = [
+        'competences' => 'array',
     ];
 
     public function progression()
@@ -22,11 +29,6 @@ class Seance extends Model
 
     public function plageHoraire()
     {
-        return $this->belongsTo(plages_horaires::class, 'plage_horaire_id');
-    }
-
-    public function evaluation()
-    {
-        return $this->hasOne(Evaluation::class);
+        return $this->belongsTo(PlageHoraire::class, 'plage_horaire_id');
     }
 }

@@ -2,14 +2,16 @@
 
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\Admin\PlageHoraireController;
+use App\Http\Controllers\Admin\CandidatController;
 Route::get('/', function () {
     return view('welcome');
 });
 
 // Redirection après connexion selon le rôle
 Route::get('/dashboard', function () {
-    return match (auth()->user()->role) {
+    return match (Auth::user()->role) {
         'admin'    => redirect('/admin/dashboard'),
         'moniteur' => redirect('/moniteur/dashboard'),
         default    => view('dashboard'),
@@ -22,9 +24,10 @@ Route::middleware(['auth', 'role:admin'])
     ->as('admin.')
     ->group(function () {
         Route::resource('plages', PlageHoraireController::class)->only(['index', 'store', 'destroy']);
-        Route::get('/dashboard', [App\Http\Controllers\Admin\DashboardController::class, 'index'])->name('dashboard');
         Route::resource('moniteurs', App\Http\Controllers\Admin\MoniteurController::class)->except(['destroy']);
+        Route::resource('candidats', CandidatController::class)->only(['index', 'show']);
         Route::patch('moniteurs/{moniteur}/toggle', [App\Http\Controllers\Admin\MoniteurController::class, 'toggleStatus'])->name('moniteurs.toggle');
+        Route::get('/dashboard', [App\Http\Controllers\Admin\DashboardController::class, 'index'])->name('dashboard');
     });
 
 
