@@ -19,6 +19,11 @@ class User extends Authenticatable
         public function moniteur(){
                     return $this->hasOne(Moniteur::class, 'user_id');
                                                 }
+
+        public function candidat()
+        {
+            return $this->hasOne(Candidat::class, 'user_id');
+        }
     /**
      * Get the attributes that should be cast.
      *

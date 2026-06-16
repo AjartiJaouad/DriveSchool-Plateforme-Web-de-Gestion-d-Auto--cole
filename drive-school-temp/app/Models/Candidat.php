@@ -17,4 +17,16 @@ class Candidat extends Model
     {
         return $this->hasOne(ProgressionDossier::class);
     }
+
+    public function seances()
+    {
+        return $this->hasManyThrough(
+            Seance::class,
+            ProgressionDossier::class,
+            'candidat_id', // Foreign key on progression_dossiers table
+            'progression_id', // Foreign key on seances table
+            'id', // Local key on candidats table
+            'id' // Local key on progression_dossiers table
+        );
+    }
 }

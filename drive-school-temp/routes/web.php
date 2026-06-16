@@ -39,6 +39,9 @@ Route::middleware(['auth', 'role:moniteur'])
     ->group(function () {
         Route::get('/dashboard', [App\Http\Controllers\MoniteurDashboardController::class, 'index'])->name('moniteur.dashboard');
         Route::get('/events', [App\Http\Controllers\MoniteurDashboardController::class, 'events'])->name('moniteur.events');
+        Route::get('/candidats/{candidat}', [App\Http\Controllers\MoniteurDashboardController::class, 'showCandidat'])->name('moniteur.candidats.show');
+        Route::get('/seances/{seance}/edit', [App\Http\Controllers\MoniteurDashboardController::class, 'editSeance'])->name('moniteur.seances.edit');
+        Route::put('/seances/{seance}', [App\Http\Controllers\MoniteurDashboardController::class, 'updateSeance'])->name('moniteur.seances.update');
         Route::patch('/seances/{seance}/statut', [App\Http\Controllers\MoniteurDashboardController::class, 'updateStatut'])->name('moniteur.seances.statut');
         Route::post('/seances/{seance}/evaluation', [App\Http\Controllers\MoniteurDashboardController::class, 'storeEvaluation'])->name('moniteur.seances.evaluation');
     });

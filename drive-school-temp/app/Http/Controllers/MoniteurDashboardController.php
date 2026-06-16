@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use App\Models\Candidat;
 use App\Models\Seance;
 use App\Models\PlageHoraire;
 
@@ -38,6 +39,7 @@ class MoniteurDashboardController extends Controller
                 'backgroundColor' => '#3B82F6', // Couleur bleue pour les créneaux libres
                 'extendedProps' => [
                     'statut' => 'disponible',
+                    'eventType' => 'plage',
                     'candidat' => 'Aucun',
                 ]
             ];
@@ -60,6 +62,7 @@ class MoniteurDashboardController extends Controller
                     'extendedProps' => [
                         'statut' => $seance->statut,
                         'candidat' => $candidatName,
+                        'candidatId' => $seance->progression->candidat->id ?? null,
                     ]
                 ];
             }
@@ -93,6 +96,69 @@ class MoniteurDashboardController extends Controller
         }
 
         return redirect()->back()->with('success', 'Statut de la séance mis à jour.');
+    }
+
+    public function showCandidat(Candidat $candidat)
+    {
+        $seances = $candidat->seances()
+            ->with(['plageHoraire.moniteur.user'])
+            ->orderBy('created_at', 'desc')
+            ->get();
+
+        $heuresEffectuees = $candidat->seances()->where('statut', 'valide')->count();
+        $progression = $candidat->progressionDossier;
+
+        return view('moniteur.candidat-show', compact('candidat', 'seances', 'heuresEffectuees', 'progression'));
+    }
+
+    public function editSeance(Seance $seance)
+    {
+        $moniteur = auth()->user()->moniteur;
+        if (! $moniteur || $seance->plageHoraire->moniteur_id !== $moniteur->id) {
+            abort(403);
+        }
+
+        $availablePlages = PlageHoraire::where('moniteur_id', $moniteur->id)
+            ->where(function ($query) use ($seance) {
+                $query->where('est_dispo', true)
+                      ->orWhere('id', $seance->plage_horaire_id);
+            })
+            ->orderBy('date')
+            ->orderBy('heure_debut')
+            ->get();
+
+        return view('moniteur.seance-edit', compact('seance', 'availablePlages'));
+    }
+
+    public function updateSeance(Request $request, Seance $seance)
+    {
+        $moniteur = auth()->user()->moniteur;
+        if (! $moniteur || $seance->plageHoraire->moniteur_id !== $moniteur->id) {
+            abort(403);
+        }
+
+        $request->validate([
+            'plage_horaire_id' => 'required|exists:plages_horaires,id',
+        ]);
+
+        $newPlage = PlageHoraire::findOrFail($request->plage_horaire_id);
+        if ($newPlage->id !== $seance->plage_horaire_id && ! $newPlage->est_dispo) {
+            return redirect()->back()->withErrors(['plage_horaire_id' => 'Ce créneau n’est plus disponible.']);
+        }
+
+        if ($newPlage->id !== $seance->plage_horaire_id) {
+            $oldPlage = $seance->plageHoraire;
+            $seance->update([
+                'plage_horaire_id' => $newPlage->id,
+                'statut' => 'valide',
+            ]);
+
+            $oldPlage->update(['est_dispo' => true]);
+            $newPlage->update(['est_dispo' => false]);
+        }
+
+        return redirect()->route('moniteur.dashboard')
+            ->with('success', 'La séance a été replanifiée avec succès.');
     }
 
     public function storeEvaluation(Request $request, Seance $seance)
