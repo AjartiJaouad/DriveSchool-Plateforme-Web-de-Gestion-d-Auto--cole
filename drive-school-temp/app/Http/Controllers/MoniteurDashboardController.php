@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Seance;
+use App\Models\PlageHoraire;
 
 class MoniteurDashboardController extends Controller
 {
@@ -14,26 +15,55 @@ class MoniteurDashboardController extends Controller
 
     public function events(Request $request)
     {
-        // $request->start, $request->end contain the date range from FullCalendar
-        $seances = Seance::with(['progression.candidat', 'plageHoraire'])
+        // 1. Récupérer le moniteur connecté
+        $moniteur = auth()->user()->moniteur;
+
+        if (!$moniteur) {
+            return response()->json([]);
+        }
+
+        $events = [];
+
+        // 2. Récupérer les plages horaires disponibles ajoutées par l'Admin
+        $plagesLibres = PlageHoraire::where('moniteur_id', $moniteur->id)
+            ->where('est_dispo', true)
             ->get();
 
-        $events = $seances->map(function ($seance) {
-            $candidatName = $seance->progression->candidat->user->name ?? 'Candidat inconnu';
-            return [
-                'id' => $seance->id,
-                'title' => 'Séance: ' . $candidatName,
-                // Fullcalendar needs start and end times. PlageHoraire has 'heure_debut', 'heure_fin', 'date'.
-                // If plageHoraire isn't setup correctly, this might break, but we'll adapt.
-                'start' => $seance->plageHoraire->date . 'T' . $seance->plageHoraire->heure_debut,
-                'end' => $seance->plageHoraire->date . 'T' . $seance->plageHoraire->heure_fin,
-                'backgroundColor' => $seance->statut === 'valide' ? '#10B981' : ($seance->statut === 'annule' ? '#EF4444' : '#F59E0B'),
+        foreach ($plagesLibres as $plage) {
+            $events[] = [
+                'id' => 'plage_' . $plage->id,
+                'title' => '🕒 Disponible (Admin)',
+                'start' => $plage->date . 'T' . $plage->heure_debut,
+                'end' => $plage->date . 'T' . $plage->heure_fin,
+                'backgroundColor' => '#3B82F6', // Couleur bleue pour les créneaux libres
                 'extendedProps' => [
-                    'statut' => $seance->statut,
-                    'candidat' => $candidatName,
+                    'statut' => 'disponible',
+                    'candidat' => 'Aucun',
                 ]
             ];
-        });
+        }
+
+        // 3. Récupérer les séances réservées pour ce moniteur spécifiquement
+        $seances = Seance::with(['progression.candidat', 'plageHoraire'])
+            ->where('moniteur_id', $moniteur->id)
+            ->get();
+
+        foreach ($seances as $seance) {
+            if ($seance->plageHoraire) {
+                $candidatName = $seance->progression->candidat->user->name ?? 'Candidat inconnu';
+                $events[] = [
+                    'id' => $seance->id,
+                    'title' => '🚗 Séance: ' . $candidatName,
+                    'start' => $seance->plageHoraire->date . 'T' . $seance->plageHoraire->heure_debut,
+                    'end' => $seance->plageHoraire->date . 'T' . $seance->plageHoraire->heure_fin,
+                    'backgroundColor' => $seance->statut === 'valide' ? '#10B981' : ($seance->statut === 'annule' ? '#EF4444' : '#F59E0B'),
+                    'extendedProps' => [
+                        'statut' => $seance->statut,
+                        'candidat' => $candidatName,
+                    ]
+                ];
+            }
+        }
 
         return response()->json($events);
     }
@@ -52,8 +82,7 @@ class MoniteurDashboardController extends Controller
                 $seance->progression->pourcentage_progres = min(100, round(($seance->progression->total_heures_realisees / $seance->progression->total_heures_prevues) * 100));
                 $seance->progression->save();
             }
-        } elseif ($request->statut === 'annule' && clone $seance->wasChanged('statut')) {
-             // Handle cancellation if it was previously valide, we might want to decrement
+        } elseif ($request->statut === 'annule') {
              if ($seance->getOriginal('statut') === 'valide' && $seance->progression) {
                  $seance->progression->decrement('total_heures_realisees');
                  if ($seance->progression->total_heures_prevues > 0) {
