@@ -1,10 +1,12 @@
 <?php
+
 use App\Http\Controllers\Admin\CandidatController;
 use App\Http\Controllers\Candidat\ReservationController;
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\Admin\PlageHoraireController;
+
 Route::get('/', function () {
     return view('welcome');
 });
@@ -30,32 +32,33 @@ Route::middleware(['auth', 'role:admin'])
         Route::get('/dashboard', [App\Http\Controllers\Admin\DashboardController::class, 'index'])->name('dashboard');
     });
 
-
+// Routes MONITEUR
 Route::middleware(['auth', 'role:moniteur'])
     ->prefix('moniteur')
     ->group(function () {
-
         Route::get('/dashboard', [App\Http\Controllers\MoniteurDashboardController::class, 'index'])->name('moniteur.dashboard');
         Route::get('/events', [App\Http\Controllers\MoniteurDashboardController::class, 'events'])->name('moniteur.events');
         Route::patch('/seances/{seance}/statut', [App\Http\Controllers\MoniteurDashboardController::class, 'updateStatut'])->name('moniteur.seances.statut');
         Route::post('/seances/{seance}/evaluation', [App\Http\Controllers\MoniteurDashboardController::class, 'storeEvaluation'])->name('moniteur.seances.evaluation');
-
-
-
-
-
     });
-    Route::middleware(['auth', 'role:candidat'])->prefix('candidat')->name('candidat.')->group(function () {
 
-    Route::get('/reservations', [ReservationController::class, 'index'])->name('reservations.index');
-});
+// Routes CANDIDAT
+Route::middleware(['auth', 'role:candidat'])
+    ->prefix('candidat')
+    ->name('candidat.')
+    ->group(function () {
+        Route::get('/reservations', [ReservationController::class, 'index'])->name('reservations.index');
 
+        Route::get('/progression', function () {
+            return view('candidat.progression');
+        })->name('progression');
+    });
+
+// Profile Routes
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
-Route::get('/candidat/progression', function () {
-    return view('candidat.progression');
-})->name('candidat.progression');
+
 require __DIR__.'/auth.php';
