@@ -18,7 +18,6 @@
         <div class="min-h-screen bg-gray-100">
             @include('layouts.navigation')
 
-            <!-- Page Heading -->
             @isset($header)
                 <header class="bg-white shadow">
                     <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
@@ -29,10 +28,14 @@
 
             <x-alert />
 
-            <!-- Page Content -->
-            <main>
-                {{-- Beddelna {{ $slot }} b @yield bch l-espace candidat iqbel @extends --}}
-                @yield('content')
+            <main class="py-8">
+                <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
+                    @hasSection('content')
+                        @yield('content')
+                    @else
+                        {{ $slot ?? '' }}
+                    @endif
+                </div>
             </main>
         </div>
     </body>

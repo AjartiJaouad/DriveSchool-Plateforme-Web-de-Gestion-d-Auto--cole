@@ -1,19 +1,24 @@
 <?php
 
-namespace App\Http\Controllers\Candidat;
+namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use App\Models\PlageHoraire;
+use App\Models\Candidat;
 use Illuminate\Http\Request;
 
-class ReservationController extends Controller
+class CandidatController extends Controller
 {
     public function index()
     {
-        $plages = PlageHoraire::all();
+        $candidats = Candidat::with(['user', 'progressionDossier'])->paginate(10);
 
-        $reservations = auth()->user()->candidat->seances ?? collect();
+        return view('admin.candidats.index', compact('candidats'));
+    }
 
-        return view('candidat.index', compact('plages', 'reservations'));
+    public function show(Candidat $candidat)
+    {
+        $candidat->load(['user', 'progressionDossier']);
+
+        return view('admin.candidats.show', compact('candidat'));
     }
 }
